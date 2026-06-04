@@ -2,17 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 export type VendorActionState = {
   status: "idle" | "success" | "error";
   message: string;
-};
-
-const demoSuccess = {
-  status: "success" as const,
-  message: "Saved in demo mode. Add Supabase credentials to persist this for real vendors.",
 };
 
 function optionalString(value: FormDataEntryValue | null) {
@@ -30,37 +24,18 @@ export async function saveVendorProfileAction(
   formData: FormData,
 ): Promise<VendorActionState> {
   const businessName = optionalString(formData.get("business_name"));
-  const serviceCategories = formData
-    .getAll("service_categories")
-    .map((item) => String(item))
-    .filter(Boolean);
-  const galleryImagePaths = formData
-    .getAll("gallery_image_paths")
-    .map((item) => String(item))
-    .filter(Boolean);
+  const serviceCategories = formData.getAll("service_categories").map((i) => String(i)).filter(Boolean);
+  const galleryImagePaths = formData.getAll("gallery_image_paths").map((i) => String(i)).filter(Boolean);
 
   if (!businessName || serviceCategories.length === 0) {
-    return {
-      status: "error",
-      message: "Add a business name and at least one service category.",
-    };
-  }
-
-  if (!isSupabaseConfigured()) {
-    revalidatePath("/dashboard/vendor");
-    return demoSuccess;
+    return { status: "error", message: "Add a business name and at least one service category." };
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      status: "error",
-      message: "Sign in as a vendor before updating your profile.",
-    };
+    return { status: "error", message: "Sign in before updating your profile." };
   }
 
   const { error } = await supabase.from("vendor_profiles").upsert(
@@ -73,26 +48,15 @@ export async function saveVendorProfileAction(
       service_categories: serviceCategories,
       cover_image_path: optionalString(formData.get("cover_image_path")),
       gallery_image_paths: galleryImagePaths,
-      price_floor: parsePositiveNumber(formData.get("price_floor"), 0),
+      price_floor: parsePositiveNumber(formData.get("price_floor"), 0) || null,
     },
-    {
-      onConflict: "user_id",
-    },
+    { onConflict: "user_id" },
   );
 
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
+  if (error) return { status: "error", message: error.message };
 
   revalidatePath("/dashboard/vendor");
-
-  return {
-    status: "success",
-    message: "Vendor profile updated.",
-  };
+  return { status: "success", message: "Profile updated." };
 }
 
 export async function submitBidAction(
@@ -104,27 +68,14 @@ export async function submitBidAction(
   const message = optionalString(formData.get("message"));
 
   if (!eventId || amount <= 0 || !message) {
-    return {
-      status: "error",
-      message: "Add a bid amount and a short proposal.",
-    };
-  }
-
-  if (!isSupabaseConfigured()) {
-    revalidatePath("/dashboard/vendor");
-    return demoSuccess;
+    return { status: "error", message: "Add a bid amount and a short proposal." };
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      status: "error",
-      message: "Sign in as a vendor before submitting a bid.",
-    };
+    return { status: "error", message: "Sign in before submitting a bid." };
   }
 
   const { error } = await supabase.from("bids").upsert(
@@ -135,22 +86,11 @@ export async function submitBidAction(
       message,
       status: "pending",
     },
-    {
-      onConflict: "event_id,vendor_id",
-    },
+    { onConflict: "event_id,vendor_id" },
   );
 
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
+  if (error) return { status: "error", message: error.message };
 
   revalidatePath("/dashboard/vendor");
-
-  return {
-    status: "success",
-    message: "Bid submitted to the customer.",
-  };
+  return { status: "success", message: "Bid submitted." };
 }

@@ -34,7 +34,7 @@ export function EventCreationFlow() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [selectedServices, setSelectedServices] = useState<string[]>(["Catering", "Florals"]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [state, formAction, isPending] = useActionState(createEventAction, {
     status: "idle" as const,
     message: "",
@@ -107,9 +107,9 @@ export function EventCreationFlow() {
               Event name
               <input
                 className="h-12 rounded-xl border border-line bg-white px-4 text-base font-medium outline-none transition focus:border-brand"
-                defaultValue="Garden engagement dinner"
                 name="name"
-                placeholder="Garden engagement dinner"
+                placeholder="e.g. Garden engagement dinner"
+                required
               />
             </label>
             <div className="grid gap-4 md:grid-cols-2">
@@ -117,16 +117,15 @@ export function EventCreationFlow() {
                 Date
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
-                  defaultValue="2026-08-22"
                   name="event_date"
                   type="date"
+                  required
                 />
               </label>
               <label className="grid gap-2 text-sm font-semibold text-stone-700">
                 Location
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
-                  defaultValue="Kuala Lumpur"
                   name="location"
                   placeholder="City or venue"
                 />
@@ -137,21 +136,23 @@ export function EventCreationFlow() {
                 Budget
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
-                  defaultValue="8500"
                   min="1"
                   name="budget"
+                  placeholder="0"
                   type="number"
+                  required
                 />
               </label>
               <label className="grid gap-2 text-sm font-semibold text-stone-700">
                 Guest count
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
-                  defaultValue="42"
                   max="99"
                   min="1"
                   name="capacity"
+                  placeholder="10"
                   type="number"
+                  required
                 />
               </label>
             </div>
@@ -188,7 +189,6 @@ export function EventCreationFlow() {
               Event details
               <textarea
                 className="min-h-36 rounded-xl border border-line bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-brand"
-                defaultValue="Warm garden dinner with a long-table setup, soft florals, and documentary photography."
                 name="details"
                 placeholder="Describe the mood, must-haves, references, and timing."
               />

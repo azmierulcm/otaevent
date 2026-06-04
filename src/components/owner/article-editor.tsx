@@ -8,7 +8,7 @@ import { OwnerActionStatus } from "@/components/owner/owner-action-status";
 import { Button } from "@/components/ui/button";
 import type { OwnerArticle } from "@/lib/owner/demo-data";
 
-export function ArticleEditor({ article }: { article: OwnerArticle }) {
+export function ArticleEditor({ article }: { article: OwnerArticle | null }) {
   const [state, formAction, isPending] = useActionState(saveArticleAction, {
     status: "idle" as const,
     message: "",
@@ -21,16 +21,18 @@ export function ArticleEditor({ article }: { article: OwnerArticle }) {
           Title
           <input
             className="h-12 rounded-xl border border-line px-4 outline-none focus:border-brand"
-            defaultValue={article.title}
+            defaultValue={article?.title ?? ""}
             name="title"
+            placeholder="Article title"
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold text-stone-700">
           Slug
           <input
             className="h-12 rounded-xl border border-line px-4 outline-none focus:border-brand"
-            defaultValue={article.slug}
+            defaultValue={article?.slug ?? ""}
             name="slug"
+            placeholder="auto-generated from title"
           />
         </label>
       </div>
@@ -39,27 +41,28 @@ export function ArticleEditor({ article }: { article: OwnerArticle }) {
         Excerpt
         <textarea
           className="min-h-20 rounded-xl border border-line px-4 py-3 leading-7 outline-none focus:border-brand"
-          defaultValue={article.excerpt ?? ""}
+          defaultValue={article?.excerpt ?? ""}
           name="excerpt"
         />
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-stone-700">
-        Hero image
+        Hero image URL
         <input
           className="h-12 rounded-xl border border-line px-4 outline-none focus:border-brand"
-          defaultValue={article.hero_image_path ?? ""}
+          defaultValue={article?.hero_image_path ?? ""}
           name="hero_image_path"
-          placeholder="Storage path or image URL"
+          placeholder="https://..."
         />
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-stone-700">
-        Body
+        Body (Markdown)
         <textarea
           className="min-h-40 rounded-xl border border-line px-4 py-3 leading-7 outline-none focus:border-brand"
-          defaultValue={article.body_md}
+          defaultValue={article?.body_md ?? ""}
           name="body_md"
+          placeholder="Write in Markdown..."
         />
       </label>
 
@@ -68,7 +71,7 @@ export function ArticleEditor({ article }: { article: OwnerArticle }) {
           Status
           <select
             className="h-12 rounded-xl border border-line px-4 outline-none focus:border-brand"
-            defaultValue={article.status}
+            defaultValue={article?.status ?? "draft"}
             name="status"
           >
             <option value="draft">Draft</option>

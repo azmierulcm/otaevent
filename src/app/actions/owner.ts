@@ -2,18 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import type { AppRole } from "@/lib/supabase/types";
+import type { AppRole, EventStatus } from "@/lib/supabase/types";
 
 export type OwnerActionState = {
   status: "idle" | "success" | "error";
   message: string;
-};
-
-const demoSuccess = {
-  status: "success" as const,
-  message: "Saved in demo mode. Add Supabase credentials to persist owner changes.",
 };
 
 function optionalString(value: FormDataEntryValue | null) {
@@ -34,6 +28,32 @@ function parseRole(value: FormDataEntryValue | null): AppRole {
   return role === "vendor" || role === "owner" ? role : "customer";
 }
 
+async function requireOwner(): Promise<
+  | { ok: true; supabase: Awaited<ReturnType<typeof createClient>>; userId: string }
+  | { ok: false; error: OwnerActionState }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: { status: "error", message: "Not authenticated." } };
+  }
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "owner") {
+    return { ok: false, error: { status: "error", message: "Owner access required." } };
+  }
+
+  return { ok: true, supabase, userId: user.id };
+}
+
 export async function saveArticleAction(
   _previousState: OwnerActionState,
   formData: FormData,
@@ -42,35 +62,18 @@ export async function saveArticleAction(
   const bodyMd = optionalString(formData.get("body_md"));
 
   if (!title || !bodyMd) {
-    return {
-      status: "error",
-      message: "Add an article title and body.",
-    };
+    return { status: "error", message: "Add an article title and body." };
   }
+
+  const auth = await requireOwner();
+  if (!auth.ok) return auth.error;
 
   const slug = optionalString(formData.get("slug")) ?? slugify(title);
   const status = String(formData.get("status")) === "published" ? "published" : "draft";
 
-  if (!isSupabaseConfigured()) {
-    revalidatePath("/dashboard/owner");
-    return demoSuccess;
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return {
-      status: "error",
-      message: "Sign in as a platform owner before publishing articles.",
-    };
-  }
-
-  const { error } = await supabase.from("articles").upsert(
+  const { error } = await auth.supabase.from("articles").upsert(
     {
-      author_id: user.id,
+      author_id: auth.userId,
       title,
       slug,
       excerpt: optionalString(formData.get("excerpt")),
@@ -79,24 +82,13 @@ export async function saveArticleAction(
       status,
       published_at: status === "published" ? new Date().toISOString() : null,
     },
-    {
-      onConflict: "slug",
-    },
+    { onConflict: "slug" },
   );
 
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
+  if (error) return { status: "error", message: error.message };
 
   revalidatePath("/dashboard/owner");
-
-  return {
-    status: "success",
-    message: "Article saved.",
-  };
+  return { status: "success", message: "Article saved." };
 }
 
 export async function saveAdBlockAction(
@@ -107,19 +99,13 @@ export async function saveAdBlockAction(
   const placement = optionalString(formData.get("placement"));
 
   if (!title || !placement) {
-    return {
-      status: "error",
-      message: "Add an ad title and placement.",
-    };
+    return { status: "error", message: "Add an ad title and placement." };
   }
 
-  if (!isSupabaseConfigured()) {
-    revalidatePath("/dashboard/owner");
-    return demoSuccess;
-  }
+  const auth = await requireOwner();
+  if (!auth.ok) return auth.error;
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("ad_blocks").insert({
+  const { error } = await auth.supabase.from("ad_blocks").insert({
     title,
     placement,
     image_path: optionalString(formData.get("image_path")),
@@ -129,19 +115,10 @@ export async function saveAdBlockAction(
     ends_at: optionalString(formData.get("ends_at")),
   });
 
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
+  if (error) return { status: "error", message: error.message };
 
   revalidatePath("/dashboard/owner");
-
-  return {
-    status: "success",
-    message: "Ad block created.",
-  };
+  return { status: "success", message: "Ad block created." };
 }
 
 export async function updateUserRoleAction(
@@ -149,38 +126,60 @@ export async function updateUserRoleAction(
   formData: FormData,
 ): Promise<OwnerActionState> {
   const userId = optionalString(formData.get("user_id"));
+  if (!userId) return { status: "error", message: "Choose a user before updating a role." };
 
-  if (!userId) {
-    return {
-      status: "error",
-      message: "Choose a user before updating a role.",
-    };
-  }
+  const auth = await requireOwner();
+  if (!auth.ok) return auth.error;
 
-  if (!isSupabaseConfigured()) {
-    revalidatePath("/dashboard/owner");
-    return demoSuccess;
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("users")
-    .update({
-      role: parseRole(formData.get("role")),
-    })
+    .update({ role: parseRole(formData.get("role")) })
     .eq("id", userId);
 
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
+  if (error) return { status: "error", message: error.message };
 
   revalidatePath("/dashboard/owner");
+  return { status: "success", message: "User role updated." };
+}
 
-  return {
-    status: "success",
-    message: "User role updated.",
-  };
+export async function verifyVendorAction(vendorId: string, isVerified: boolean) {
+  const auth = await requireOwner();
+  if (!auth.ok) return;
+
+  await auth.supabase
+    .from("vendor_profiles")
+    .update({ is_verified: isVerified })
+    .eq("id", vendorId);
+
+  revalidatePath("/dashboard/owner");
+}
+
+export async function updateEventStatusAction(eventId: string, status: EventStatus) {
+  const auth = await requireOwner();
+  if (!auth.ok) return;
+
+  await auth.supabase.from("events").update({ status }).eq("id", eventId);
+
+  revalidatePath("/dashboard/owner");
+}
+
+export async function updateEventStatusFormAction(formData: FormData): Promise<void> {
+  const eventId = String(formData.get("event_id") ?? "");
+  const status = String(formData.get("status") ?? "") as EventStatus;
+  if (!eventId) return;
+
+  const auth = await requireOwner();
+  if (!auth.ok) return;
+
+  await auth.supabase.from("events").update({ status }).eq("id", eventId);
+  revalidatePath("/dashboard/owner");
+}
+
+export async function deleteUserAction(userId: string) {
+  const auth = await requireOwner();
+  if (!auth.ok) return;
+
+  await auth.supabase.from("users").delete().eq("id", userId);
+
+  revalidatePath("/dashboard/owner");
 }

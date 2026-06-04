@@ -34,11 +34,27 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Unauthenticated → login
   if (!user && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Owner dashboard requires owner role
+  if (user && pathname.startsWith("/dashboard/owner")) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "owner") {
+      const url = request.nextUrl.clone();
+      url.pathname = `/dashboard/${profile?.role ?? "customer"}`;
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

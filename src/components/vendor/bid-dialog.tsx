@@ -48,9 +48,9 @@ export function BidDialog({
             Bid amount
             <input
               className="h-12 rounded-xl border border-line px-4 outline-none focus:border-brand"
-              defaultValue={Math.round(budget * 0.25)}
               min="1"
               name="amount"
+              placeholder={String(Math.round(budget * 0.25))}
               type="number"
             />
           </label>
@@ -58,8 +58,8 @@ export function BidDialog({
             Proposal
             <textarea
               className="min-h-32 rounded-xl border border-line px-4 py-3 leading-7 outline-none focus:border-brand"
-              defaultValue="We can support this event with a compact scope, clear setup window, and a polished guest-facing finish."
               name="message"
+              placeholder="Describe your scope, what's included, and why you're the right fit."
             />
           </label>
           <VendorActionStatus state={state} />
