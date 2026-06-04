@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, PartyPopper, Plus, Send } from "lucide-react";
 
 import { createEventAction } from "@/app/actions/customer";
@@ -30,12 +31,25 @@ const serviceOptions = [
 const steps = ["Basics", "Services", "Details"];
 
 export function EventCreationFlow() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [selectedServices, setSelectedServices] = useState<string[]>(["Catering", "Florals"]);
   const [state, formAction, isPending] = useActionState(createEventAction, {
     status: "idle" as const,
     message: "",
   });
+
+  useEffect(() => {
+    if (state.status === "success") {
+      const timer = setTimeout(() => {
+        setOpen(false);
+        setStep(0);
+        router.refresh();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.status, router]);
 
   const progress = useMemo(() => `${((step + 1) / steps.length) * 100}%`, [step]);
 
@@ -48,7 +62,7 @@ export function EventCreationFlow() {
   }
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <Button size="lg">
           <Plus className="size-4" />

@@ -89,8 +89,6 @@ export async function createEventAction(
     };
   }
 
-  revalidatePath("/dashboard/customer");
-
   return {
     status: "success",
     message: "Event request created. Vendors can now send bids.",
