@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Otaevent
 
-## Getting Started
+Mobile-first classified event CMS for planners, vendors, and platform owners.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router, React, TypeScript
+- Tailwind CSS with Shadcn-style UI foundations
+- Supabase Auth, Postgres, Storage, and Realtime
+- Lucide React icons
+
+## Phase 1
+
+Phase 1 sets up the database and auth foundation:
+
+- Supabase schema and RLS in `supabase/migrations/0001_initial_schema.sql`
+- Role-backed `users` table for customer, vendor, and owner access
+- Core tables for events, bids, bid messages, registry, RSVP, vendor availability, articles, and ad blocks
+- Public storage buckets for avatars, event images, portfolios, articles, and registry items
+- Browser, server, and proxy Supabase clients in `src/lib/supabase`
+- Shadcn-style `Button` and `Dialog` primitives in `src/components/ui`
+
+## Phase 2
+
+Phase 2 adds the public Airbnb-style interface:
+
+- Tailwind design tokens for brand color, surfaces, borders, and soft shadows
+- Sticky desktop navigation with a pill-shaped action/search menu
+- Sticky mobile bottom tab bar
+- Image-led public hero with search controls
+- Responsive discovery grid using `grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6`
+- Role cards for planners, vendors, and platform owners
+- Native ad inventory section for owner-managed placements
+
+## Phase 3
+
+Phase 3 adds the customer module:
+
+- Customer dashboard at `/dashboard/customer`
+- Multi-step event creation dialog with basics, service selection, and details
+- Server actions for event creation, RSVP submission, and registry claiming
+- Demo-mode fallback when Supabase credentials are not configured
+- Public RSVP and registry page at `/events/[slug]`
+- Vendor bid stream and guest tooling surfaces for the customer workflow
+
+## Phase 4
+
+Phase 4 adds the vendor module:
+
+- Vendor dashboard at `/dashboard/vendor`
+- Business profile editor for name, bio, pricing, location, services, and cover image
+- Portfolio gallery uploader targeting the Supabase `portfolio` storage bucket
+- Demo-mode upload fallback when Supabase credentials are not configured
+- Job directory of open customer event requests
+- Bidding dialog and server action for creating or updating vendor bids
+- Active bid list for pending and accepted proposals
+
+## Phase 5
+
+Phase 5 adds the platform owner module:
+
+- Owner dashboard at `/dashboard/owner`
+- Editorial CMS article editor with status, slug, hero image, excerpt, and rich body fields
+- Editorial stream using typography-ready article previews
+- Native ad block editor for marketplace, registry, and article placements
+- Admin management tables for users, vendors, events, and bids
+- User role management action for customer, vendor, and owner roles
+- Demo-mode fallback for owner workflows when Supabase credentials are not configured
+
+## Local Setup
+
+Create local environment values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from your Supabase project settings.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Install dependencies and run:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+For a stable production preview:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Supabase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Apply the initial migration through the Supabase SQL editor or the Supabase CLI:
 
-## Deploy on Vercel
+```bash
+supabase db push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app shell will render without Supabase credentials, and session refresh turns on automatically once the env values are present.
