@@ -65,7 +65,6 @@ export async function submitRsvpAction(
   formData: FormData,
 ): Promise<CustomerActionState> {
   const eventId = optionalString(formData.get("event_id"));
-  const slug = optionalString(formData.get("slug")) ?? "";
   const guestName = optionalString(formData.get("guest_name"));
   const guestEmail = optionalString(formData.get("guest_email"));
   const partySize = parsePositiveNumber(formData.get("party_size"), 1);
@@ -75,6 +74,13 @@ export async function submitRsvpAction(
     return { status: "error", message: "Add your name and email to RSVP." };
   }
 
+  const dietary = formData.getAll("dietary").map(String).filter(Boolean);
+  const customNote = optionalString(formData.get("note"));
+  const note = [
+    dietary.length > 0 ? `Dietary: ${dietary.join(", ")}` : null,
+    customNote,
+  ].filter(Boolean).join(" · ") || null;
+
   const supabase = await createClient();
   const { error } = await supabase.from("rsvps").upsert(
     {
@@ -83,14 +89,14 @@ export async function submitRsvpAction(
       guest_email: guestEmail,
       party_size: partySize,
       status: statusRaw === "no" || statusRaw === "maybe" ? statusRaw : "yes",
-      note: optionalString(formData.get("note")),
+      note,
     },
     { onConflict: "event_id,guest_email" },
   );
 
   if (error) return { status: "error", message: error.message };
 
-  return { status: "success", message: "RSVP saved. Thank you!" };
+  return { status: "success", message: "RSVP saved. See you there!" };
 }
 
 export async function claimRegistryItemAction(
