@@ -91,6 +91,29 @@ npm run build
 npm run start
 ```
 
+## Investor Demo Data
+
+Populate the Malaysian investor-demo dataset:
+
+```bash
+npm run seed:demo
+```
+
+The seed creates:
+
+- 10 customer planner accounts with Malaysian event requests
+- 10 vendor accounts with strong visual profiles and portfolio images
+- 1 owner account for the platform dashboard
+- Bids, registries, RSVP entries, editorial articles, and native ad placements
+
+The script prints local demo login credentials after a successful run.
+
+Useful demo URLs:
+
+- Marketplace: `/`
+- Event page: `/events/deepavali-open-house-bangsar`
+- Event page: `/events/majlis-persandingan-amirul-aisyah`
+
 ## Supabase
 
 Apply the initial migration through the Supabase SQL editor or the Supabase CLI:

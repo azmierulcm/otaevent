@@ -1,5 +1,6 @@
 /**
- * Demo seed script — populates 10 vendors, 5 customers, events, and bids
+ * Demo seed script — populates 10 vendors, 10 customers, events, bids,
+ * registries, RSVPs, editorial stories, native ads, and one owner account
  * for investor/demo purposes.
  *
  * Usage:
@@ -7,7 +8,8 @@
  *      (Project Settings → API → service_role secret key)
  *   2. npx tsx scripts/seed-demo.ts
  *
- * Safe to re-run: skips users whose email already exists.
+ * Safe to re-run: skips users whose email already exists and avoids
+ * duplicate events, bids, registry items, RSVPs, articles, and ads.
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -30,6 +32,8 @@ const supabase = createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
+type DemoRole = "customer" | "vendor" | "owner";
+
 function img(id: string) {
   return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=82`;
 }
@@ -37,7 +41,7 @@ function img(id: string) {
 async function createUser(
   email: string,
   fullName: string,
-  role: "customer" | "vendor",
+  role: DemoRole,
 ): Promise<string | null> {
   // Check if already exists
   const { data: existing } = await supabase
@@ -66,6 +70,13 @@ async function createUser(
   console.log(`  ✓ Created ${role}: ${fullName} <${email}>`);
   return data.user.id;
 }
+
+// ── Owner data ────────────────────────────────────────────────────────────
+
+const OWNER = {
+  email: "owner@otaevent-demo.com",
+  fullName: "Azmierul Chemat",
+};
 
 // ── Vendor data ───────────────────────────────────────────────────────────
 
@@ -280,6 +291,7 @@ const CUSTOMERS = [
         location: "Kuala Lumpur",
         status: "open" as const,
         visibility: "shared" as const,
+        share_slug: "majlis-persandingan-amirul-aisyah",
       },
     ],
   },
@@ -298,6 +310,7 @@ const CUSTOMERS = [
         location: "Penang",
         status: "open" as const,
         visibility: "shared" as const,
+        share_slug: "kejutan-hari-jadi-rashidah",
       },
     ],
   },
@@ -316,6 +329,7 @@ const CUSTOMERS = [
         location: "Shah Alam",
         status: "open" as const,
         visibility: "shared" as const,
+        share_slug: "pertunangan-haziq-amira",
       },
     ],
   },
@@ -334,6 +348,7 @@ const CUSTOMERS = [
         location: "KLCC, Kuala Lumpur",
         status: "open" as const,
         visibility: "shared" as const,
+        share_slug: "baby-shower-ilham",
       },
     ],
   },
@@ -352,6 +367,102 @@ const CUSTOMERS = [
         location: "KLCC, Kuala Lumpur",
         status: "open" as const,
         visibility: "shared" as const,
+        share_slug: "nexus-capital-gala-2026",
+      },
+    ],
+  },
+  {
+    email: "lim.weishen@otaevent-demo.com",
+    fullName: "Lim Wei Shen",
+    events: [
+      {
+        name: "George Town Product Launch Night",
+        budget: 12000,
+        services: ["Photography", "Venue", "Decor"],
+        event_date: "2026-09-05",
+        details:
+          "A boutique product launch for 70 guests in George Town. We need a stylish venue, clean modern styling, and strong photography for social content and press kits.",
+        capacity: 70,
+        location: "George Town, Penang",
+        status: "open" as const,
+        visibility: "shared" as const,
+        share_slug: "george-town-product-launch",
+      },
+    ],
+  },
+  {
+    email: "priya.nair@otaevent-demo.com",
+    fullName: "Priya Nair",
+    events: [
+      {
+        name: "Deepavali Open House in Bangsar",
+        budget: 9000,
+        services: ["Catering", "Decor", "Music"],
+        event_date: "2026-10-31",
+        details:
+          "A warm Deepavali open house for 55 guests. Looking for Malaysian-Indian catering, tasteful festive decor, and light live music for a relaxed family atmosphere.",
+        capacity: 55,
+        location: "Bangsar, Kuala Lumpur",
+        status: "open" as const,
+        visibility: "shared" as const,
+        share_slug: "deepavali-open-house-bangsar",
+      },
+    ],
+  },
+  {
+    email: "siti.khadijah@otaevent-demo.com",
+    fullName: "Siti Khadijah Mohd Noor",
+    events: [
+      {
+        name: "Majlis Aqiqah & Doa Selamat",
+        budget: 7000,
+        services: ["Catering", "Dessert", "Decor"],
+        event_date: "2026-08-08",
+        details:
+          "A family aqiqah and doa selamat for 65 guests in Kajang. We want a halal buffet, a small dessert corner, and simple pastel styling suitable for a home compound.",
+        capacity: 65,
+        location: "Kajang, Selangor",
+        status: "open" as const,
+        visibility: "shared" as const,
+        share_slug: "aqiqah-doa-selamat-kajang",
+      },
+    ],
+  },
+  {
+    email: "daniel.tan@otaevent-demo.com",
+    fullName: "Daniel Tan",
+    events: [
+      {
+        name: "Rooftop Proposal Dinner",
+        budget: 6500,
+        services: ["Venue", "Florals", "Photography"],
+        event_date: "2026-07-18",
+        details:
+          "A private rooftop proposal dinner for 18 guests in Mont Kiara. Need a beautiful intimate venue, elegant florals, and a discreet photographer for the surprise moment.",
+        capacity: 18,
+        location: "Mont Kiara, Kuala Lumpur",
+        status: "open" as const,
+        visibility: "shared" as const,
+        share_slug: "rooftop-proposal-mont-kiara",
+      },
+    ],
+  },
+  {
+    email: "nur.iman@otaevent-demo.com",
+    fullName: "Nur Iman Hakim",
+    events: [
+      {
+        name: "Johor Bahru Family Reunion",
+        budget: 11000,
+        services: ["Venue", "Catering", "Music"],
+        event_date: "2026-12-12",
+        details:
+          "A year-end family reunion for 85 relatives in Johor Bahru. We need a comfortable private hall, Malaysian buffet catering, and light acoustic music for dinner.",
+        capacity: 85,
+        location: "Johor Bahru, Johor",
+        status: "open" as const,
+        visibility: "shared" as const,
+        share_slug: "jb-family-reunion",
       },
     ],
   },
@@ -498,12 +609,276 @@ const BIDS = [
     message:
       "We will style your rooftop with a cloud-white balloon installation framed by tropical greenery — perfect for photos. Includes a small floral table centrepiece and personalised welcome sign.",
   },
+  {
+    vendorEmail: "ahmad.zamani@otaevent-demo.com",
+    customerEmail: "lim.weishen@otaevent-demo.com",
+    amount: 3600,
+    message:
+      "For the George Town launch, we can cover arrival shots, keynote/product moments, candid networking, and 40 same-night highlight images for social media. Full gallery delivered within 5 working days.",
+  },
+  {
+    vendorEmail: "dayang.decor@otaevent-demo.com",
+    customerEmail: "lim.weishen@otaevent-demo.com",
+    amount: 3100,
+    message:
+      "We suggest a clean editorial setup with branded plinths, warm lighting, and a compact media wall. The look will feel premium but still practical for a product showcase.",
+  },
+  {
+    vendorEmail: "selera.warisan@otaevent-demo.com",
+    customerEmail: "priya.nair@otaevent-demo.com",
+    amount: 4200,
+    message:
+      "We can prepare a Deepavali-friendly Malaysian spread with biryani, vegetarian sides, dhal, kuih, and tea service. Halal-certified kitchen, with clear vegetarian labelling for guests.",
+  },
+  {
+    vendorEmail: "harmoni.live@otaevent-demo.com",
+    customerEmail: "priya.nair@otaevent-demo.com",
+    amount: 1900,
+    message:
+      "Our acoustic trio can keep the open house warm and conversational, mixing festive instrumentals, local favourites, and light contemporary songs without overpowering the room.",
+  },
+  {
+    vendorEmail: "sweet.moments@otaevent-demo.com",
+    customerEmail: "siti.khadijah@otaevent-demo.com",
+    amount: 780,
+    message:
+      "For the aqiqah, we can prepare a pastel dessert corner with mini cupcakes, onde-onde cups, brownies, and a simple baby-themed cake. Setup and collection included.",
+  },
+  {
+    vendorEmail: "selera.warisan@otaevent-demo.com",
+    customerEmail: "siti.khadijah@otaevent-demo.com",
+    amount: 5100,
+    message:
+      "Our aqiqah package includes nasi beriani, kambing, ayam masak merah, dalca, drinks, disposable tableware, and buffet service for 65 pax. Suitable for home compound setup.",
+  },
+  {
+    vendorEmail: "dewan.merbok@otaevent-demo.com",
+    customerEmail: "daniel.tan@otaevent-demo.com",
+    amount: 4600,
+    message:
+      "Our terrace can be arranged for a private proposal dinner with skyline views, candlelit dining, and staff support. We can coordinate a surprise entrance and post-proposal dessert service.",
+  },
+  {
+    vendorEmail: "casa.verde@otaevent-demo.com",
+    customerEmail: "daniel.tan@otaevent-demo.com",
+    amount: 1300,
+    message:
+      "We can create a compact proposal floral setup with white roses, tropical greenery, aisle petals, and a small table arrangement that photographs beautifully at sunset.",
+  },
+  {
+    vendorEmail: "dewan.merbok@otaevent-demo.com",
+    customerEmail: "nur.iman@otaevent-demo.com",
+    amount: 6200,
+    message:
+      "For the family reunion, our private hall layout can fit 85 guests comfortably with buffet flow, kids' corner, and a small stage for speeches or performances.",
+  },
+  {
+    vendorEmail: "harmoni.live@otaevent-demo.com",
+    customerEmail: "nur.iman@otaevent-demo.com",
+    amount: 2400,
+    message:
+      "We propose an acoustic Malay classics set during dinner, followed by singalong favourites after speeches. Family-friendly, warm, and not too loud for older guests.",
+  },
 ];
+
+// ── Visual/demo extras ────────────────────────────────────────────────────
+
+const RSVP_NAMES = [
+  ["Aida Rahman", "aida.rahman@example.com", "yes", 2, "Halal meal preferred"],
+  ["Ben Tan", "ben.tan@example.com", "yes", 1, "Looking forward to it"],
+  ["Meera Krishnan", "meera.krishnan@example.com", "maybe", 1, "Will confirm closer to the date"],
+  ["Hakim Salleh", "hakim.salleh@example.com", "yes", 3, "Bringing family"],
+] as const;
+
+const REGISTRY_POOL = [
+  {
+    title: "Dessert table contribution",
+    description: "Help the host add a few extra sweets for guests.",
+    target_quantity: 4,
+    claimed_quantity: 1,
+    external_url: "https://www.google.com/search?q=malaysia+dessert+table",
+  },
+  {
+    title: "Fresh flower arrangement",
+    description: "Contribute toward table florals and entrance styling.",
+    target_quantity: 5,
+    claimed_quantity: 2,
+    external_url: "https://www.google.com/search?q=malaysia+event+flowers",
+  },
+  {
+    title: "Photo print fund",
+    description: "A small contribution toward printed memories after the event.",
+    target_quantity: 6,
+    claimed_quantity: 0,
+    external_url: "https://www.google.com/search?q=photo+printing+malaysia",
+  },
+  {
+    title: "Door gift budget",
+    description: "Support simple Malaysian-style door gifts for invited guests.",
+    target_quantity: 8,
+    claimed_quantity: 3,
+    external_url: "https://www.google.com/search?q=malaysia+door+gift",
+  },
+];
+
+const ARTICLES = [
+  {
+    title: "How Malaysian hosts plan intimate events under RM10k",
+    slug: "malaysian-events-under-10k",
+    excerpt:
+      "A practical guide for planners balancing venue, catering, decor, and photography budgets.",
+    body_md:
+      "Malaysian hosts often want celebrations that feel warm, polished, and personal without turning into a full-scale hotel ballroom production.\n\nStart with the guest count, then choose the two categories that matter most: food, venue, decor, photography, entertainment, or coordination. Otaevent helps planners post one request and compare vendor bids side by side.",
+    hero_image_path: img("1511795409834-ef04bbd61622"),
+    status: "published" as const,
+  },
+  {
+    title: "Why vendors need better visibility beyond social media",
+    slug: "vendor-visibility-malaysia",
+    excerpt:
+      "A marketplace view of how small event vendors can convert portfolios into qualified leads.",
+    body_md:
+      "Many Malaysian vendors rely on Instagram, WhatsApp, and referrals. That works, but it makes pricing, availability, and comparison difficult for planners.\n\nOtaevent gives vendors a structured profile, visual portfolio, bid workflow, and access to live customer requests across Malaysia.",
+    hero_image_path: img("1527529482837-4698179dc6ce"),
+    status: "published" as const,
+  },
+];
+
+const AD_BLOCKS = [
+  {
+    title: "Featured vendor: Selera Warisan Catering",
+    placement: "home_grid",
+    image_path: img("1555244162-803834f70033"),
+    destination_url: "/#discover",
+    is_active: true,
+    starts_at: null,
+    ends_at: null,
+  },
+  {
+    title: "Registry partner: Malaysian door gifts",
+    placement: "registry_sidebar",
+    image_path: img("1540189549336-e6e99c3679fe"),
+    destination_url: "/events/garden-engagement",
+    is_active: true,
+    starts_at: null,
+    ends_at: null,
+  },
+  {
+    title: "Editorial sponsor: Casa Verde Florals",
+    placement: "article_inline",
+    image_path: img("1487070183336-b863922373d4"),
+    destination_url: "/#discover",
+    is_active: true,
+    starts_at: null,
+    ends_at: null,
+  },
+];
+
+async function seedRegistryAndRsvps(eventId: string, eventName: string) {
+  const { data: registry, error: registryError } = await supabase
+    .from("registry")
+    .upsert(
+      {
+        event_id: eventId,
+        title: `${eventName} registry`,
+        note: "A few thoughtful ways guests can support the host.",
+      },
+      { onConflict: "event_id" },
+    )
+    .select("id")
+    .single();
+
+  if (registryError || !registry) {
+    console.error(`  ✗ Registry upsert failed: ${registryError?.message}`);
+    return;
+  }
+
+  for (const item of REGISTRY_POOL.slice(0, 3)) {
+    const { data: existing } = await supabase
+      .from("registry_items")
+      .select("id")
+      .eq("registry_id", registry.id)
+      .eq("title", item.title)
+      .maybeSingle();
+
+    if (existing) continue;
+
+    const { error } = await supabase.from("registry_items").insert({
+      registry_id: registry.id,
+      title: item.title,
+      description: item.description,
+      image_path: null,
+      target_quantity: item.target_quantity,
+      claimed_quantity: item.claimed_quantity,
+      claimed_by_name: null,
+      claimed_by_email: null,
+      external_url: item.external_url,
+    });
+
+    if (error) console.error(`  ✗ Registry item failed: ${error.message}`);
+  }
+
+  for (const [guestName, guestEmail, status, partySize, note] of RSVP_NAMES) {
+    const { error } = await supabase.from("rsvps").upsert(
+      {
+        event_id: eventId,
+        guest_name: guestName,
+        guest_email: guestEmail,
+        status,
+        party_size: partySize,
+        note,
+      },
+      { onConflict: "event_id,guest_email" },
+    );
+
+    if (error) console.error(`  ✗ RSVP failed: ${error.message}`);
+  }
+}
+
+async function seedOwnerContent(ownerId: string) {
+  console.log("\n── Editorial & Ads ──────────");
+
+  for (const article of ARTICLES) {
+    const { error } = await supabase.from("articles").upsert(
+      {
+        author_id: ownerId,
+        ...article,
+        published_at: new Date().toISOString(),
+      },
+      { onConflict: "slug" },
+    );
+
+    if (error) console.error(`  ✗ Article failed: ${error.message}`);
+    else console.log(`  ✓ Article: ${article.title}`);
+  }
+
+  for (const ad of AD_BLOCKS) {
+    const { data: existing } = await supabase
+      .from("ad_blocks")
+      .select("id")
+      .eq("title", ad.title)
+      .eq("placement", ad.placement)
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`  ⏭  Ad already exists: ${ad.title}`);
+      continue;
+    }
+
+    const { error } = await supabase.from("ad_blocks").insert(ad);
+    if (error) console.error(`  ✗ Ad failed: ${error.message}`);
+    else console.log(`  ✓ Ad: ${ad.title}`);
+  }
+}
 
 // ── Main ──────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("🌱 Seeding Otaevent demo data…\n");
+
+  // 0. Create owner account
+  console.log("── Owner ────────────────────");
+  const ownerId = await createUser(OWNER.email, OWNER.fullName, "owner");
 
   // 1. Create vendor users + profiles
   console.log("── Vendors ──────────────────");
@@ -542,7 +917,13 @@ async function main() {
 
       if (existing) {
         console.log(`  ⏭  Event "${ev.name}" already exists`);
+        const { error: updateError } = await supabase
+          .from("events")
+          .update(ev)
+          .eq("id", existing.id);
+        if (updateError) console.error(`  ✗ Event update failed: ${updateError.message}`);
         eventIds[c.email] = existing.id;
+        await seedRegistryAndRsvps(existing.id, ev.name);
         continue;
       }
 
@@ -556,6 +937,7 @@ async function main() {
       else {
         eventIds[c.email] = inserted.id;
         console.log(`  ✓ Event: ${ev.name}`);
+        await seedRegistryAndRsvps(inserted.id, ev.name);
       }
     }
   }
@@ -599,9 +981,15 @@ async function main() {
     else console.log(`  ✓ Bid: ${bid.vendorEmail} → ${bid.customerEmail} (RM ${bid.amount})`);
   }
 
+  if (ownerId) {
+    await seedOwnerContent(ownerId);
+  }
+
   console.log("\n✅ Seed complete.");
   console.log(`\n📋 Demo login credentials (all users):`);
   console.log(`   Password: ${DEMO_PASSWORD}`);
+  console.log(`\n   Owner:`);
+  console.log(`   ${OWNER.email}`);
   console.log(`\n   Vendors:`);
   VENDORS.forEach((v) => console.log(`   ${v.email}`));
   console.log(`\n   Customers:`);
