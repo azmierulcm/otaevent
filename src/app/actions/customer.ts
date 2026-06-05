@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 
 export type CustomerActionState = {
@@ -97,6 +99,32 @@ export async function submitRsvpAction(
   if (error) return { status: "error", message: error.message };
 
   return { status: "success", message: "RSVP saved. See you there!" };
+}
+
+export async function acceptBid(bidId: string): Promise<CustomerActionState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("bids")
+    .update({ status: "accepted" })
+    .eq("id", bidId);
+
+  if (error) return { status: "error", message: error.message };
+
+  revalidatePath("/dashboard/customer");
+  return { status: "success", message: "Bid accepted." };
+}
+
+export async function declineBid(bidId: string): Promise<CustomerActionState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("bids")
+    .update({ status: "declined" })
+    .eq("id", bidId);
+
+  if (error) return { status: "error", message: error.message };
+
+  revalidatePath("/dashboard/customer");
+  return { status: "success", message: "Bid declined." };
 }
 
 export async function claimRegistryItemAction(

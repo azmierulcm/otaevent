@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { BidDialog } from "@/components/vendor/bid-dialog";
+import { VendorBidStream } from "@/components/vendor/vendor-bid-stream";
 import { VendorProfileEditor } from "@/components/vendor/vendor-profile-editor";
 import { SiteNavbar } from "@/components/shared/site-navbar";
 import { UserNav } from "@/components/shared/user-nav";
@@ -74,6 +75,7 @@ async function getVendorDashboardData() {
   };
 
   return {
+    userId: user.id,
     profile: (profile ?? blankProfile) as VendorProfile,
     hasProfile: !!profile,
     jobs,
@@ -97,15 +99,8 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
 }
 
-const bidStatusColors: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700",
-  accepted: "bg-emerald-50 text-emerald-700",
-  declined: "bg-red-50 text-red-700",
-  withdrawn: "bg-stone-100 text-stone-500",
-};
-
 export default async function VendorDashboardPage() {
-  const { profile, hasProfile, jobs, bids } = await getVendorDashboardData();
+  const { userId, profile, hasProfile, jobs, bids } = await getVendorDashboardData();
   const pendingBids = bids.filter((b) => b.status === "pending").length;
   const acceptedBids = bids.filter((b) => b.status === "accepted").length;
   const averageBudget = jobs.length > 0 ? jobs.reduce((sum, j) => sum + j.budget, 0) / jobs.length : 0;
@@ -233,35 +228,16 @@ export default async function VendorDashboardPage() {
             </section>
 
             <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-line">
-              <p className="text-sm font-semibold text-brand">My bids</p>
-              <h2 className="text-2xl font-semibold tracking-normal">Active bids</h2>
-
-              {bids.length === 0 ? (
-                <div className="mt-6 flex flex-col items-center gap-3 py-8 text-center">
-                  <Inbox className="size-8 text-stone-300" />
-                  <p className="text-sm text-stone-500">No bids sent yet. Browse the job directory above.</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-brand">My bids</p>
+                  <h2 className="text-2xl font-semibold tracking-normal">Active bids</h2>
                 </div>
-              ) : (
-                <div className="mt-5 grid gap-4">
-                  {bids.map((bid) => (
-                    <article className="rounded-2xl bg-surface-soft p-4" key={bid.id}>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-semibold tracking-normal">{bid.event_name}</h3>
-                          <p className="mt-1 text-sm leading-6 text-stone-600">{bid.message}</p>
-                        </div>
-                        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${bidStatusColors[bid.status] ?? "bg-stone-100 text-stone-500"}`}>
-                          {bid.status}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <span className="text-lg font-semibold">{formatCurrency(bid.amount)}</span>
-                        <span className="text-sm text-stone-500">{formatDate(bid.created_at)}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
+                <span className="ml-auto rounded-full bg-surface-soft px-2.5 py-1 text-xs font-semibold text-stone-500">
+                  Live
+                </span>
+              </div>
+              <VendorBidStream initialBids={bids} userId={userId} />
             </section>
           </div>
         </section>

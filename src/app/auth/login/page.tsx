@@ -1,14 +1,14 @@
-"use client";
-
-import { useActionState } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
-import { signIn } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
+import { LoginForm } from "./login-form";
 
-export default function LoginPage() {
-  const [state, formAction, pending] = useActionState(signIn, null);
+interface LoginPageProps {
+  searchParams: Promise<{ next?: string; error?: string; message?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { next, error, message } = await searchParams;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -36,47 +36,11 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <form action={formAction} className="mt-8 space-y-4">
-            <div className="space-y-1.5">
-              <label className="block text-sm font-semibold" htmlFor="email">
-                Email
-              </label>
-              <input
-                autoComplete="email"
-                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                id="email"
-                name="email"
-                placeholder="you@example.com"
-                required
-                type="email"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-sm font-semibold" htmlFor="password">
-                Password
-              </label>
-              <input
-                autoComplete="current-password"
-                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                id="password"
-                name="password"
-                placeholder="••••••••"
-                required
-                type="password"
-              />
-            </div>
-
-            {state?.error ? (
-              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {state.error}
-              </p>
-            ) : null}
-
-            <Button className="w-full" disabled={pending} type="submit">
-              {pending ? "Signing in…" : "Sign in"}
-            </Button>
-          </form>
+          <LoginForm
+            errorParam={error}
+            messageParam={message}
+            next={next}
+          />
         </div>
       </main>
     </div>
