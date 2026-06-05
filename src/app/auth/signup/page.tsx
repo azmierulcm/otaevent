@@ -29,13 +29,18 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-line bg-white px-4 py-4 md:px-8">
-        <Link className="inline-flex items-center gap-2 text-lg font-semibold" href="/">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand text-brand-foreground">
-            <Sparkles className="size-4" />
-          </span>
-          Otaevent
-        </Link>
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 shadow-sm backdrop-blur-xl">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
+          <Link className="flex items-center gap-2 text-lg font-semibold tracking-normal" href="/">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand text-brand-foreground">
+              <Sparkles className="size-4" />
+            </span>
+            Otaevent
+          </Link>
+          <Link className="text-sm font-semibold text-stone-500 transition hover:text-stone-950" href="/auth/login">
+            Sign in
+          </Link>
+        </nav>
       </header>
 
       <main className="flex flex-1 items-start justify-center px-4 py-12">

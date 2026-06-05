@@ -13,6 +13,7 @@ import {
 
 import { BidStream } from "@/components/customer/bid-stream";
 import { EventCreationFlow } from "@/components/customer/event-creation-flow";
+import { SiteNavbar } from "@/components/shared/site-navbar";
 import { UserNav } from "@/components/shared/user-nav";
 import { Button } from "@/components/ui/button";
 import type { CustomerBid, CustomerEvent } from "@/lib/customer/demo-data";
@@ -84,15 +85,7 @@ export default async function CustomerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
-          <Link className="text-lg font-semibold tracking-normal" href="/">Otaevent</Link>
-          <div className="flex items-center gap-3">
-            <EventCreationFlow />
-            <UserNav />
-          </div>
-        </div>
-      </header>
+      <SiteNavbar right={<><EventCreationFlow /><UserNav /></>} />
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">

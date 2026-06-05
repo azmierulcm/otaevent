@@ -16,6 +16,7 @@ import {
 
 import { BidDialog } from "@/components/vendor/bid-dialog";
 import { VendorProfileEditor } from "@/components/vendor/vendor-profile-editor";
+import { SiteNavbar } from "@/components/shared/site-navbar";
 import { UserNav } from "@/components/shared/user-nav";
 import { Button } from "@/components/ui/button";
 import type { CustomerEvent } from "@/lib/customer/demo-data";
@@ -111,12 +112,7 @@ export default async function VendorDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
-          <Link className="text-lg font-semibold tracking-normal" href="/">Otaevent</Link>
-          <UserNav />
-        </div>
-      </header>
+      <SiteNavbar right={<UserNav />} />
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">

@@ -15,6 +15,7 @@ import {
 import { AdBlockEditor } from "@/components/owner/ad-block-editor";
 import { ArticleEditor } from "@/components/owner/article-editor";
 import { UserRoleForm } from "@/components/owner/user-role-form";
+import { SiteNavbar } from "@/components/shared/site-navbar";
 import { UserNav } from "@/components/shared/user-nav";
 import { Button } from "@/components/ui/button";
 import type { CustomerBid, CustomerEvent } from "@/lib/customer/demo-data";
@@ -101,12 +102,7 @@ export default async function OwnerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
-          <Link className="text-lg font-semibold tracking-normal" href="/">Otaevent</Link>
-          <UserNav />
-        </div>
-      </header>
+      <SiteNavbar right={<UserNav />} />
 
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 md:px-8 md:py-10">
 

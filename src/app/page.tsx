@@ -24,9 +24,8 @@ import { UserNav } from "@/components/shared/user-nav";
 
 const navItems = [
   { label: "Explore", href: "#discover" },
-  { label: "Vendors", href: "/dashboard/vendor" },
-  { label: "Registry", href: "/events/garden-engagement" },
-  { label: "Owner", href: "/dashboard/owner" },
+  { label: "For planners", href: "#roles" },
+  { label: "For vendors", href: "#roles" },
 ];
 
 const heroStats = [
@@ -111,8 +110,8 @@ const adTiles = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-white/60 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl md:px-8">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 shadow-sm backdrop-blur-xl">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <Link className="flex min-w-0 items-center gap-2 text-lg font-semibold tracking-normal" href="/">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand text-brand-foreground">
               <Sparkles className="size-4" />
@@ -148,7 +147,7 @@ export default function Home() {
 
       <main>
         <section
-          className="relative overflow-hidden bg-stone-950 pt-24 text-white"
+          className="relative overflow-hidden bg-stone-950 text-white"
           style={{
             backgroundImage:
               "linear-gradient(180deg, rgba(28,25,23,0.18), rgba(28,25,23,0.82)), url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1800&q=82')",
