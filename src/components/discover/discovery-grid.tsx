@@ -48,7 +48,7 @@ export function DiscoveryGrid({ cards, hasFilters }: DiscoveryGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
       {cards.map((item) => (
         <article
           className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition hover:-translate-y-1 hover:shadow-md"
@@ -76,14 +76,14 @@ export function DiscoveryGrid({ cards, hasFilters }: DiscoveryGridProps) {
                 {item.tag}
               </span>
             </div>
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug tracking-normal text-stone-900">
+            <div className="p-3 md:p-4">
+              <div className="flex items-start justify-between gap-1.5">
+                <h3 className="line-clamp-2 min-w-0 text-xs font-semibold leading-snug tracking-normal text-stone-900 md:text-sm">
                   {item.title}
                 </h3>
-                <span className="shrink-0 pl-1 text-sm font-semibold text-stone-900">{item.price}</span>
+                <span className="shrink-0 text-xs font-semibold text-stone-900 md:pl-1 md:text-sm">{item.price}</span>
               </div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-stone-500">
+              <div className="mt-1.5 flex items-center gap-1 text-xs text-stone-500 md:mt-2 md:gap-1.5">
                 <MapPin className="size-3 shrink-0" />
                 <span className="min-w-0 truncate">{item.location}</span>
                 {item.meta && (
