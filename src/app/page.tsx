@@ -333,97 +333,117 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* How it works */}
         <section id="roles" className="border-y border-line bg-white">
-          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:grid-cols-[1.1fr_0.9fr] md:px-8 md:py-16">
-            <div>
-              <p className="text-sm font-semibold text-brand">For planners</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-normal md:text-4xl">
-                Plan your event in three steps
-              </h2>
-              <ol className="mt-8 space-y-6">
-                {[
-                  {
-                    step: "01",
-                    title: "Post your event request",
-                    body: "Describe what you need — venue, florals, catering, photography. Set your budget and date. It takes under two minutes.",
-                  },
-                  {
-                    step: "02",
-                    title: "Compare bids from verified vendors",
-                    body: "Vendors respond with personalised proposals. Review them side by side, ask questions, and accept the best fit.",
-                  },
-                  {
-                    step: "03",
-                    title: "Manage everything in one place",
-                    body: "Share your RSVP and registry page with guests. Track attendance, gifting, and your event timeline from one dashboard.",
-                  },
-                ].map(({ step, title, body }) => (
-                  <li className="flex gap-5" key={step}>
-                    <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-sm font-bold text-brand">
-                      {step}
-                    </span>
-                    <div>
-                      <p className="font-semibold tracking-normal">{title}</p>
-                      <p className="mt-1 text-sm leading-6 text-stone-500">{body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <Link
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-600"
-                href={viewerRole === "customer" ? "/dashboard/customer" : "/auth/signup"}
-              >
-                <HeartHandshake className="size-4" />
-                {viewerRole === "customer" ? "Post an event request" : "Start planning free"}
-              </Link>
-            </div>
+          <div className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-16">
 
-            <aside className="flex flex-col gap-4">
-              <div className="rounded-2xl bg-stone-950 p-6 text-white shadow-airbnb">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
+            {/* 2-2 role grid */}
+            <div className="grid gap-5 md:grid-cols-2">
+
+              {/* Planner card */}
+              <div className="flex flex-col rounded-2xl bg-rose-50 p-7 ring-1 ring-rose-100">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand ring-1 ring-rose-100">
+                  <HeartHandshake className="size-3.5" />
+                  For planners
+                </span>
+                <h2 className="mt-5 text-2xl font-semibold leading-snug tracking-normal md:text-3xl">
+                  Plan your event in three steps
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-stone-500">
+                  Post a brief, get bids from verified vendors, and manage RSVPs — all in one place.
+                </p>
+                <ol className="mt-7 space-y-5">
+                  {[
+                    {
+                      step: "01",
+                      title: "Post your event request",
+                      body: "Describe what you need, set your budget and date. Under two minutes.",
+                    },
+                    {
+                      step: "02",
+                      title: "Compare bids from verified vendors",
+                      body: "Review personalised proposals side by side and accept the best fit.",
+                    },
+                    {
+                      step: "03",
+                      title: "Manage RSVPs and registry",
+                      body: "Share a public guest page for RSVP, gifting, and event updates.",
+                    },
+                  ].map(({ step, title, body }) => (
+                    <li className="flex gap-4" key={step}>
+                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-brand shadow-sm">
+                        {step}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold tracking-normal text-stone-900">{title}</p>
+                        <p className="mt-0.5 text-sm leading-6 text-stone-500">{body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <div className="mt-auto pt-8">
+                  <Link
+                    className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-600"
+                    href={viewerRole === "customer" ? "/dashboard/customer" : "/auth/signup"}
+                  >
+                    <HeartHandshake className="size-4" />
+                    {viewerRole === "customer" ? "Post an event request" : "Start planning free"}
+                  </Link>
+                </div>
+              </div>
+
+              {/* Vendor card */}
+              <div className="flex flex-col rounded-2xl bg-stone-950 p-7 text-white">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
                   <Store className="size-3.5" />
                   For vendors
                 </span>
-                <h2 className="mt-4 text-2xl font-semibold tracking-normal leading-snug">
+                <h2 className="mt-5 text-2xl font-semibold leading-snug tracking-normal md:text-3xl">
                   Grow your event business on Otaevent
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-white/70">
-                  Publish your portfolio, browse open event requests, and send polished bids — all from one dashboard. No commission on accepted jobs.
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Publish your portfolio, browse open requests, and send polished bids — no commission on accepted jobs.
                 </p>
-                <ul className="mt-5 space-y-2">
+                <ul className="mt-7 space-y-4">
                   {[
-                    "Gallery profile with cover image",
-                    "Browse open planner requests",
-                    "Bid management dashboard",
-                    "Availability calendar",
-                  ].map((item) => (
-                    <li className="flex items-center gap-2.5 text-sm text-white/80" key={item}>
-                      <BadgeCheck className="size-4 shrink-0 text-emerald-400" />
-                      {item}
+                    { title: "Gallery profile with cover image", body: "Showcase your best work with a portfolio that planners love browsing." },
+                    { title: "Browse open planner requests", body: "See live event briefs from real planners looking for your services." },
+                    { title: "Bid management dashboard", body: "Track every proposal, follow up, and close jobs from one screen." },
+                    { title: "Availability calendar", body: "Mark your dates so planners know exactly when you're free." },
+                  ].map(({ title, body }) => (
+                    <li className="flex gap-4" key={title}>
+                      <BadgeCheck className="mt-0.5 size-5 shrink-0 text-emerald-400" />
+                      <div>
+                        <p className="text-sm font-semibold text-white">{title}</p>
+                        <p className="mt-0.5 text-sm leading-6 text-white/50">{body}</p>
+                      </div>
                     </li>
                   ))}
                 </ul>
-                <Link
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-950 shadow-sm transition hover:bg-stone-100"
-                  href={viewerRole === "vendor" ? "/dashboard/vendor" : "/auth/signup"}
-                >
-                  {viewerRole === "vendor" ? "Go to vendor dashboard" : "Join as a vendor"}
-                </Link>
+                <div className="mt-auto pt-8">
+                  <Link
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-950 shadow-sm transition hover:bg-stone-100"
+                    href={viewerRole === "vendor" ? "/dashboard/vendor" : "/auth/signup"}
+                  >
+                    {viewerRole === "vendor" ? "Go to vendor dashboard" : "Join as a vendor"}
+                  </Link>
+                </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: "128", label: "Open requests" },
-                  { value: "64", label: "Active vendors" },
-                  { value: "2.8k", label: "Guest RSVPs" },
-                  { value: "Free", label: "To get started" },
-                ].map(({ value, label }) => (
-                  <div className="rounded-2xl bg-surface-soft p-4 ring-1 ring-line" key={label}>
-                    <p className="text-2xl font-semibold">{value}</p>
-                    <p className="mt-1 text-xs font-medium text-stone-500">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </aside>
+            {/* Stats strip */}
+            <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {[
+                { value: "128", label: "Open requests" },
+                { value: "64", label: "Active vendors" },
+                { value: "2.8k", label: "Guest RSVPs" },
+                { value: "Free", label: "To get started" },
+              ].map(({ value, label }) => (
+                <div className="rounded-2xl bg-surface-soft p-5 ring-1 ring-line" key={label}>
+                  <p className="text-2xl font-semibold">{value}</p>
+                  <p className="mt-1 text-xs font-medium text-stone-500">{label}</p>
+                </div>
+              ))}
+            </div>
+
           </div>
         </section>
 
