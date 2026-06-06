@@ -51,20 +51,19 @@ export function DiscoveryGrid({ cards, hasFilters }: DiscoveryGridProps) {
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((item) => (
         <article
-          className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition hover:-translate-y-1 hover:shadow-md"
+          className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition hover:-translate-y-1 hover:shadow-md"
           key={item.id}
         >
-          {/* Heart button sits outside <Link> to avoid button-inside-anchor */}
-          <div className="relative">
-            <button
-              aria-label="Save"
-              className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full bg-white/90 text-stone-900 shadow-sm backdrop-blur transition hover:scale-105"
-              type="button"
-            >
-              <Heart className="size-4" />
-            </button>
-          </div>
-          <Link href={item.href}>
+          {/* Heart — outside Link to avoid nested interactive elements, anchored to article */}
+          <button
+            aria-label="Save"
+            className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full bg-white/90 text-stone-900 shadow-sm backdrop-blur transition hover:scale-105"
+            type="button"
+          >
+            <Heart className="size-4" />
+          </button>
+
+          <Link className="block" href={item.href}>
             <div className="relative aspect-[4/3] overflow-hidden bg-surface-soft">
               <Image
                 alt={item.title}
@@ -78,18 +77,21 @@ export function DiscoveryGrid({ cards, hasFilters }: DiscoveryGridProps) {
               </span>
             </div>
             <div className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="text-base font-semibold leading-6 tracking-normal">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug tracking-normal text-stone-900">
                   {item.title}
                 </h3>
-                <span className="shrink-0 text-sm font-semibold">{item.price}</span>
+                <span className="shrink-0 pl-1 text-sm font-semibold text-stone-900">{item.price}</span>
               </div>
-              <div className="mt-3 flex items-center justify-between gap-3 text-sm text-stone-600">
-                <span className="inline-flex min-w-0 items-center gap-1">
-                  <MapPin className="size-4 shrink-0" />
-                  <span className="truncate">{item.location}</span>
-                </span>
-                <span className="shrink-0">{item.meta}</span>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-stone-500">
+                <MapPin className="size-3 shrink-0" />
+                <span className="min-w-0 truncate">{item.location}</span>
+                {item.meta && (
+                  <>
+                    <span className="shrink-0 text-stone-300">·</span>
+                    <span className="shrink-0">{item.meta}</span>
+                  </>
+                )}
               </div>
               {item.services && item.services.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1">

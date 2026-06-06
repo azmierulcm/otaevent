@@ -169,7 +169,7 @@ async function fetchDiscovery(params: {
         title: v.business_name,
         location: v.base_location ?? "Malaysia",
         price: v.price_floor ? `From ${formatCurrency(v.price_floor)}` : "Get a quote",
-        meta: v.tagline ?? `${v.service_categories.length} services`,
+        meta: `${v.service_categories.length} service${v.service_categories.length !== 1 ? "s" : ""}`,
         tag: "Vendor",
         image,
         href: `/vendors/${v.id}`,
