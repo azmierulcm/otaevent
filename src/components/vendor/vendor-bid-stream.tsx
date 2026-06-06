@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, MessageSquare } from "lucide-react";
 
+import { BidMessageThread } from "@/components/shared/bid-message-thread";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/shared/toast";
 import { createClient } from "@/lib/supabase/client";
 import type { VendorBid } from "@/lib/vendor/demo-data";
@@ -44,12 +53,12 @@ const bidStatusLabels: Record<string, string> = {
 
 export function VendorBidStream({ userId, initialBids }: VendorBidStreamProps) {
   const [bids, setBids] = useState<VendorBid[]>(initialBids);
+  const [threadBidId, setThreadBidId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const supabase = createClient();
 
-    // eq filter is supported by Supabase Realtime postgres_changes
     const channel = supabase
       .channel("vendor-bids")
       .on(
@@ -117,6 +126,8 @@ export function VendorBidStream({ userId, initialBids }: VendorBidStreamProps) {
     };
   }, [userId, toast]);
 
+  const activeBid = bids.find((b) => b.id === threadBidId);
+
   if (bids.length === 0) {
     return (
       <div className="mt-6 flex flex-col items-center gap-3 py-8 text-center">
@@ -129,26 +140,55 @@ export function VendorBidStream({ userId, initialBids }: VendorBidStreamProps) {
   }
 
   return (
-    <div className="mt-5 grid gap-4">
-      {bids.map((bid) => (
-        <article className="rounded-2xl bg-surface-soft p-4" key={bid.id}>
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="font-semibold tracking-normal">{bid.event_name}</h3>
-              <p className="mt-1 text-sm leading-6 text-stone-600">{bid.message}</p>
+    <>
+      <div className="mt-5 grid gap-4">
+        {bids.map((bid) => (
+          <article className="rounded-2xl bg-surface-soft p-4" key={bid.id}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="font-semibold tracking-normal">{bid.event_name}</h3>
+                <p className="mt-1 text-sm leading-6 text-stone-600">{bid.message}</p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${bidStatusColors[bid.status] ?? "bg-stone-100 text-stone-500"}`}
+              >
+                {bidStatusLabels[bid.status] ?? bid.status}
+              </span>
             </div>
-            <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${bidStatusColors[bid.status] ?? "bg-stone-100 text-stone-500"}`}
-            >
-              {bidStatusLabels[bid.status] ?? bid.status}
-            </span>
-          </div>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <span className="text-lg font-semibold">{formatCurrency(bid.amount)}</span>
-            <span className="text-sm text-stone-500">{formatDate(bid.created_at)}</span>
-          </div>
-        </article>
-      ))}
-    </div>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <span className="text-lg font-semibold">{formatCurrency(bid.amount)}</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setThreadBidId(bid.id)}
+                  size="sm"
+                  variant="secondary"
+                >
+                  <MessageSquare className="size-4" />
+                  Message
+                </Button>
+                <span className="text-sm text-stone-500">{formatDate(bid.created_at)}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Message thread dialog */}
+      <Dialog onOpenChange={(open) => !open && setThreadBidId(null)} open={!!threadBidId}>
+        <DialogContent className="md:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Message thread</DialogTitle>
+            <DialogDescription>
+              {activeBid
+                ? `${activeBid.event_name} · ${formatCurrency(activeBid.amount)}`
+                : "Bid conversation"}
+            </DialogDescription>
+          </DialogHeader>
+          {threadBidId && (
+            <BidMessageThread bidId={threadBidId} currentUserId={userId} />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -37,7 +37,7 @@ async function getCustomerDashboardData() {
   const eventIds = eventRows.map((e) => e.id);
 
   if (eventIds.length === 0) {
-    return { events: [], bids: [] };
+    return { userId: user.id, events: [], bids: [] };
   }
 
   const { data: bids } = await supabase
@@ -47,6 +47,7 @@ async function getCustomerDashboardData() {
     .order("created_at", { ascending: false });
 
   return {
+    userId: user.id,
     events: eventRows,
     bids: (bids ?? []).map((bid) => ({
       id: bid.id,
@@ -77,7 +78,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default async function CustomerDashboardPage() {
-  const { events, bids } = await getCustomerDashboardData();
+  const { userId, events, bids } = await getCustomerDashboardData();
   const activeEvents = events.filter((e) => e.status === "open").length;
   const totalBudget = events.reduce((sum, e) => sum + e.budget, 0);
   const pendingBids = bids.filter((b) => b.status === "pending").length;
@@ -210,7 +211,7 @@ export default async function CustomerDashboardPage() {
               </span>
             </div>
             <div className="mt-5">
-              <BidStream eventIds={events.map((e) => e.id)} initialBids={bids} />
+              <BidStream eventIds={events.map((e) => e.id)} initialBids={bids} userId={userId} />
             </div>
           </aside>
         </section>

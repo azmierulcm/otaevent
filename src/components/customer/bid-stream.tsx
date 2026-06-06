@@ -1,10 +1,18 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, MessageSquare, XCircle } from "lucide-react";
 
 import { acceptBid, declineBid } from "@/app/actions/customer";
+import { BidMessageThread } from "@/components/shared/bid-message-thread";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/shared/toast";
 import { createClient } from "@/lib/supabase/client";
 import type { CustomerBid } from "@/lib/customer/demo-data";
@@ -12,6 +20,7 @@ import type { CustomerBid } from "@/lib/customer/demo-data";
 interface BidStreamProps {
   eventIds: string[];
   initialBids: CustomerBid[];
+  userId: string;
 }
 
 function formatCurrency(value: number) {
@@ -36,9 +45,10 @@ const statusLabels: Record<string, string> = {
   withdrawn: "Withdrawn",
 };
 
-export function BidStream({ eventIds, initialBids }: BidStreamProps) {
+export function BidStream({ eventIds, initialBids, userId }: BidStreamProps) {
   const [bids, setBids] = useState<CustomerBid[]>(initialBids);
   const [isPending, startTransition] = useTransition();
+  const [threadBidId, setThreadBidId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,8 +56,6 @@ export function BidStream({ eventIds, initialBids }: BidStreamProps) {
 
     const supabase = createClient();
 
-    // Subscribe without a row filter — RLS on bids ensures only this
-    // customer's bids are delivered. Client-side guard below is extra safety.
     const channel = supabase
       .channel("customer-bids")
       .on(
@@ -107,9 +115,7 @@ export function BidStream({ eventIds, initialBids }: BidStreamProps) {
     startTransition(async () => {
       const snapshot = bids;
       setBids((prev) =>
-        prev.map((b) =>
-          b.id === bidId ? { ...b, status: "accepted" as const } : b,
-        ),
+        prev.map((b) => (b.id === bidId ? { ...b, status: "accepted" as const } : b)),
       );
       const result = await acceptBid(bidId);
       if (result.status === "error") {
@@ -125,9 +131,7 @@ export function BidStream({ eventIds, initialBids }: BidStreamProps) {
     startTransition(async () => {
       const snapshot = bids;
       setBids((prev) =>
-        prev.map((b) =>
-          b.id === bidId ? { ...b, status: "declined" as const } : b,
-        ),
+        prev.map((b) => (b.id === bidId ? { ...b, status: "declined" as const } : b)),
       );
       const result = await declineBid(bidId);
       if (result.status === "error") {
@@ -136,6 +140,8 @@ export function BidStream({ eventIds, initialBids }: BidStreamProps) {
       }
     });
   }
+
+  const activeBid = bids.find((b) => b.id === threadBidId);
 
   if (bids.length === 0) {
     return (
@@ -146,46 +152,75 @@ export function BidStream({ eventIds, initialBids }: BidStreamProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {bids.map((bid) => (
-        <article className="rounded-2xl bg-surface-soft p-4" key={bid.id}>
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="font-semibold tracking-normal">{bid.vendor_name}</h3>
-              <p className="mt-1 text-sm leading-6 text-stone-600">{bid.message}</p>
+    <>
+      <div className="space-y-4">
+        {bids.map((bid) => (
+          <article className="rounded-2xl bg-surface-soft p-4" key={bid.id}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="font-semibold tracking-normal">{bid.vendor_name}</h3>
+                <p className="mt-1 text-sm leading-6 text-stone-600">{bid.message}</p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusColors[bid.status] ?? "bg-stone-100 text-stone-500"}`}
+              >
+                {statusLabels[bid.status] ?? bid.status}
+              </span>
             </div>
-            <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusColors[bid.status] ?? "bg-stone-100 text-stone-500"}`}
-            >
-              {statusLabels[bid.status] ?? bid.status}
-            </span>
-          </div>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <span className="text-lg font-semibold">{formatCurrency(bid.amount)}</span>
-            {bid.status === "pending" ? (
-              <div className="flex gap-2">
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <span className="text-lg font-semibold">{formatCurrency(bid.amount)}</span>
+              <div className="flex items-center gap-2">
                 <Button
-                  disabled={isPending}
-                  onClick={() => handleDecline(bid.id)}
+                  onClick={() => setThreadBidId(bid.id)}
                   size="sm"
                   variant="secondary"
                 >
-                  <XCircle className="size-4" />
-                  Decline
+                  <MessageSquare className="size-4" />
+                  Message
                 </Button>
-                <Button
-                  disabled={isPending}
-                  onClick={() => handleAccept(bid.id)}
-                  size="sm"
-                >
-                  <CheckCircle2 className="size-4" />
-                  Accept
-                </Button>
+                {bid.status === "pending" && (
+                  <>
+                    <Button
+                      disabled={isPending}
+                      onClick={() => handleDecline(bid.id)}
+                      size="sm"
+                      variant="secondary"
+                    >
+                      <XCircle className="size-4" />
+                      Decline
+                    </Button>
+                    <Button
+                      disabled={isPending}
+                      onClick={() => handleAccept(bid.id)}
+                      size="sm"
+                    >
+                      <CheckCircle2 className="size-4" />
+                      Accept
+                    </Button>
+                  </>
+                )}
               </div>
-            ) : null}
-          </div>
-        </article>
-      ))}
-    </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Message thread dialog */}
+      <Dialog onOpenChange={(open) => !open && setThreadBidId(null)} open={!!threadBidId}>
+        <DialogContent className="md:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Message thread</DialogTitle>
+            <DialogDescription>
+              {activeBid
+                ? `${activeBid.vendor_name} · ${formatCurrency(activeBid.amount)}`
+                : "Bid conversation"}
+            </DialogDescription>
+          </DialogHeader>
+          {threadBidId && (
+            <BidMessageThread bidId={threadBidId} currentUserId={userId} />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
