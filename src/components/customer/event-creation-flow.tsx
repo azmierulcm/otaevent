@@ -2,9 +2,9 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, PartyPopper, Plus, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, PartyPopper, Pencil, Plus, Send } from "lucide-react";
 
-import { createEventAction } from "@/app/actions/customer";
+import { createEventAction, updateEventAction } from "@/app/actions/customer";
 import { ActionStatus } from "@/components/customer/action-status";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { CustomerEvent } from "@/lib/customer/demo-data";
 import { cn } from "@/lib/utils";
 
 const serviceOptions = [
@@ -30,15 +31,31 @@ const serviceOptions = [
 
 const steps = ["Basics", "Services", "Details"];
 
-export function EventCreationFlow() {
+interface EventCreationFlowProps {
+  /** When provided the dialog opens in edit mode pre-filled with existing values. */
+  event?: CustomerEvent;
+}
+
+export function EventCreationFlow({ event }: EventCreationFlowProps = {}) {
+  const isEdit = !!event;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [state, formAction, isPending] = useActionState(createEventAction, {
+  const [selectedServices, setSelectedServices] = useState<string[]>(event?.services ?? []);
+
+  const action = isEdit ? updateEventAction : createEventAction;
+  const [state, formAction, isPending] = useActionState(action, {
     status: "idle" as const,
     message: "",
   });
+
+  // Reset step and services whenever the dialog closes
+  useEffect(() => {
+    if (!open) {
+      setStep(0);
+      setSelectedServices(event?.services ?? []);
+    }
+  }, [open, event?.services]);
 
   useEffect(() => {
     if (state.status === "success") {
@@ -64,16 +81,27 @@ export function EventCreationFlow() {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="lg">
-          <Plus className="size-4" />
-          Create event
-        </Button>
+        {isEdit ? (
+          <Button size="sm" variant="secondary">
+            <Pencil className="size-3.5" />
+            Edit
+          </Button>
+        ) : (
+          <Button size="lg">
+            <Plus className="size-4" />
+            Create event
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="overflow-y-auto md:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create an event request</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit event request" : "Create an event request"}
+          </DialogTitle>
           <DialogDescription>
-            Build a vendor-ready brief for an intimate event under 100 guests.
+            {isEdit
+              ? "Update your event details. Changes are visible to vendors immediately."
+              : "Build a vendor-ready brief for an intimate event under 100 guests."}
           </DialogDescription>
         </DialogHeader>
 
@@ -98,15 +126,19 @@ export function EventCreationFlow() {
         </div>
 
         <form action={formAction} className="mt-6 space-y-5">
+          {/* Hidden fields */}
+          {isEdit && <input name="event_id" type="hidden" value={event.id} />}
           {selectedServices.map((service) => (
             <input key={service} name="services" type="hidden" value={service} />
           ))}
 
+          {/* ── Step 0: Basics ── */}
           <div className={cn(step === 0 ? "grid gap-4" : "hidden")}>
             <label className="grid gap-2 text-sm font-semibold text-stone-700">
               Event name
               <input
                 className="h-12 rounded-xl border border-line bg-white px-4 text-base font-medium outline-none transition focus:border-brand"
+                defaultValue={event?.name}
                 name="name"
                 placeholder="e.g. Garden engagement dinner"
                 required
@@ -117,6 +149,7 @@ export function EventCreationFlow() {
                 Date
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
+                  defaultValue={event?.event_date}
                   name="event_date"
                   type="date"
                   required
@@ -126,6 +159,7 @@ export function EventCreationFlow() {
                 Location
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
+                  defaultValue={event?.location ?? ""}
                   name="location"
                   placeholder="City or venue"
                 />
@@ -136,6 +170,7 @@ export function EventCreationFlow() {
                 Budget
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
+                  defaultValue={event?.budget}
                   min="1"
                   name="budget"
                   placeholder="0"
@@ -147,6 +182,7 @@ export function EventCreationFlow() {
                 Guest count
                 <input
                   className="h-12 rounded-xl border border-line bg-white px-4 text-base outline-none transition focus:border-brand"
+                  defaultValue={event?.capacity}
                   max="99"
                   min="1"
                   name="capacity"
@@ -158,12 +194,12 @@ export function EventCreationFlow() {
             </div>
           </div>
 
+          {/* ── Step 1: Services ── */}
           <div className={cn(step === 1 ? "grid gap-4" : "hidden")}>
             <p className="text-sm font-semibold text-stone-700">Services needed</p>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {serviceOptions.map((service) => {
                 const isSelected = selectedServices.includes(service);
-
                 return (
                   <button
                     className={cn(
@@ -184,28 +220,32 @@ export function EventCreationFlow() {
             </div>
           </div>
 
+          {/* ── Step 2: Details ── */}
           <div className={cn(step === 2 ? "grid gap-4" : "hidden")}>
             <label className="grid gap-2 text-sm font-semibold text-stone-700">
               Event details
               <textarea
                 className="min-h-36 rounded-xl border border-line bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-brand"
+                defaultValue={event?.details ?? ""}
                 name="details"
                 placeholder="Describe the mood, must-haves, references, and timing."
               />
             </label>
-            <div className="rounded-2xl bg-surface-soft p-4">
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center rounded-full bg-brand text-white">
-                  <PartyPopper className="size-5" />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-stone-950">Vendor-ready request</p>
-                  <p className="text-sm text-stone-600">
-                    This will publish as an open customer request with a shareable guest page.
-                  </p>
+            {!isEdit && (
+              <div className="rounded-2xl bg-surface-soft p-4">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-full bg-brand text-white">
+                    <PartyPopper className="size-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-stone-950">Vendor-ready request</p>
+                    <p className="text-sm text-stone-600">
+                      This will publish as an open customer request with a shareable guest page.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <ActionStatus state={state} />
@@ -221,14 +261,19 @@ export function EventCreationFlow() {
               Back
             </Button>
             {step < steps.length - 1 ? (
-              <Button onClick={() => setStep((current) => Math.min(steps.length - 1, current + 1))} type="button">
+              <Button
+                onClick={() => setStep((current) => Math.min(steps.length - 1, current + 1))}
+                type="button"
+              >
                 Next
                 <ArrowRight className="size-4" />
               </Button>
             ) : (
               <Button disabled={isPending} type="submit">
                 <Send className="size-4" />
-                {isPending ? "Publishing..." : "Publish request"}
+                {isPending
+                  ? isEdit ? "Saving…" : "Publishing..."
+                  : isEdit ? "Save changes" : "Publish request"}
               </Button>
             )}
           </div>

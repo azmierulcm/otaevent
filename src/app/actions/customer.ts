@@ -101,6 +101,52 @@ export async function submitRsvpAction(
   return { status: "success", message: "RSVP saved. See you there!" };
 }
 
+export async function updateEventAction(
+  _previousState: CustomerActionState,
+  formData: FormData,
+): Promise<CustomerActionState> {
+  const eventId = optionalString(formData.get("event_id"));
+  const name = optionalString(formData.get("name"));
+  const eventDate = optionalString(formData.get("event_date"));
+  const services = formData.getAll("services").map((s) => String(s)).filter(Boolean);
+  const budget = parsePositiveNumber(formData.get("budget"));
+  const capacity = parsePositiveNumber(formData.get("capacity"));
+
+  if (!eventId) return { status: "error", message: "Event not found." };
+
+  if (!name || !eventDate || services.length === 0 || budget <= 0 || capacity <= 0) {
+    return { status: "error", message: "Add an event name, date, budget, guest count, and at least one service." };
+  }
+
+  if (capacity >= 100) {
+    return { status: "error", message: "Otaevent supports events under 100 guests." };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { status: "error", message: "Sign in before editing an event." };
+
+  const { error } = await supabase
+    .from("events")
+    .update({
+      name,
+      budget,
+      services,
+      event_date: eventDate,
+      details: optionalString(formData.get("details")),
+      capacity,
+      location: optionalString(formData.get("location")),
+    })
+    .eq("id", eventId)
+    .eq("customer_id", user.id);
+
+  if (error) return { status: "error", message: error.message };
+
+  revalidatePath("/dashboard/customer");
+  return { status: "success", message: "Event updated." };
+}
+
 export async function acceptBid(bidId: string): Promise<CustomerActionState> {
   const supabase = await createClient();
   const { error } = await supabase

@@ -184,6 +184,7 @@ export default async function CustomerDashboardPage() {
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+                      <EventCreationFlow event={event} />
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/events/${event.share_slug}`}>
                           <Gift className="size-4" />
