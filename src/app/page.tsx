@@ -267,8 +267,8 @@ export default async function Home({ searchParams }: HomeProps) {
           className="relative overflow-hidden bg-stone-950 text-white"
           style={{
             backgroundImage:
-              "linear-gradient(180deg, rgba(28,25,23,0.18), rgba(28,25,23,0.82)), url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1800&q=82')",
-            backgroundPosition: "center",
+              "linear-gradient(180deg, rgba(28,25,23,0.25), rgba(28,25,23,0.72)), url('https://www.effortlessevents.in/home-page.png')",
+            backgroundPosition: "center 65%",
             backgroundSize: "cover",
           }}
         >
